@@ -659,25 +659,32 @@ clearEvents();
 /* ---------------------------------------------------
    5) STROOP TESTİ
 --------------------------------------------------- */
+/* ---------------------------------------------------
+   5) STROOP TESTİ — RENK = KELİME → TIKLA
+--------------------------------------------------- */
 function stroopTesti() {
     clearEvents();
     let hit = 0, wrong = 0;
 
     const renkler = ["kırmızı", "mavi", "yeşil"];
-    const kod = { kırmızı:"red", mavi:"blue", yeşil:"green" };
+    const renkKod = { kırmızı:"red", mavi:"blue", yeşil:"green" };
 
     let seq = [];
 
-    for (let i=0;i<10;i++){
-        let r = renkler[Math.floor(Math.random()*3)];
-        seq.push({kelime:r, renk:r});
+    // 10 DOĞRU (RENK = KELİME)
+    for (let i = 0; i < 10; i++) {
+        let r = renkler[Math.floor(Math.random() * 3)];
+        seq.push({ kelime: r, renk: r });
     }
 
-    for (let i=0;i<10;i++){
-        let w = renkler[Math.floor(Math.random()*3)];
-        let c = w;
-        while (c === w) c = renkler[Math.floor(Math.random()*3)];
-        seq.push({kelime:w, renk:c});
+    // 10 YANILTICI (RENK ≠ KELİME)
+    for (let i = 0; i < 10; i++) {
+        let kelime = renkler[Math.floor(Math.random() * 3)];
+        let renk = kelime;
+        while (renk === kelime) {
+            renk = renkler[Math.floor(Math.random() * 3)];
+        }
+        seq.push({ kelime, renk });
     }
 
     shuffle(seq);
@@ -688,9 +695,8 @@ function stroopTesti() {
     let interval = setInterval(() => {
 
         let item = seq[index];
-
         testScreen.innerHTML = item.kelime.toUpperCase();
-        testScreen.style.color = kod[item.renk];
+        testScreen.style.color = renkKod[item.renk];
 
         testScreen.onclick = () => {
             if (item.kelime === item.renk) hit++;
@@ -710,8 +716,9 @@ function stroopTesti() {
             runTest();
         }
 
-    }, 800);
+    }, 1200);
 }
+
 
 
 /* ---------------------------------------------------
@@ -735,9 +742,12 @@ function durtusellikTesti() {
         testScreen.innerHTML = w;
 
         testScreen.onclick = () => {
-            if (w === "TIKLA") hit++;
-            else wrong++;
-        };
+    testScreen.onclick = null; // ikinci tıklamayı engelle
+    if (w === "TIKLA") hit++;
+    else wrong++;
+};
+
+        
 
         index++;
         if (index >= seq.length) {
@@ -790,18 +800,25 @@ function runTest() {
         () => hiperaktiviteTesti()
     );
 
+ 
+
+
+
    else if (currentTest === 5) showInstruction(
     "STROOP TESTİ",
-    "Kelimenin <b>rengine</b> göre karar ver.",
+    "Yazıya değil, <b>YAZI RENGİNE</b> bak.<br><br>" +
+    "EĞER:<br>" +
+    "Yazının RENGİ ile YAZDIĞI kelime AYNIYSA ➜ <b>TIKLA</b><br><br>" +
+    "FARKLIYSA ➜ <b>HİÇBİR ŞEY YAPMA</b>",
     () => stroopTesti()
+
+);
+else if (currentTest === 6) showInstruction(
+    "DÜRTÜSELLİK",
+    "'TIKLA' yazarsa tıkla. 'BEKLE' yazarsa tıklama.",
+    () => durtusellikTesti()
 );
 
-
-    else if (currentTest === 6) showInstruction(
-        "DÜRTÜSELLİK",
-        "'TIKLA' yazarsa tıkla. 'BEKLE' yazarsa tıklama.",
-        () => durtusellikTesti()
-    );
 
     else if (currentTest === 7) showInstruction(
         "10 SORULUK SINAV",
@@ -826,24 +843,47 @@ let examInterval;
 function buildExamQuestions() {
     examQuestions = [
         { q:"2 - 4 - 6 - 8 - ?", a:["9","10","12"], c:1 },
-        { q:"Farklı olan hangisi? ● ● ■", a:["1. ●","2. ●","3. ■"], c:2 },
 
-        { q:"3 sandalye 2 masa kaç eşya?", a:["3","5","6"], c:1 },
-        { q:"En küçük hangisi?", a:["15","9","21"], c:1 },
+        { q:"Farklı olan hangisi?<br>● ● ■", a:["●","●","■"], c:2 },
 
-        { q:"Öğretmen konuşurken ne yapılır?", a:["Araya girilir","Sessizce dinlenir","Yürünür"], c:1 },
-        { q:"Dur levhası ne demektir?", a:["Dön","Dur","Hızlan"], c:1 },
+        { q:"3 sandalye ve 2 masa toplam kaç eşyadır?", a:["3","5","6"], c:1 },
 
-        { q:"RENK NEDİR?<br><span style='color:red'>MAVİ</span>", a:["Kırmızı","Mavi","Yeşil"], c:0 },
-        { q:"RENK NEDİR?<br><span style='color:blue'>KIRMIZI</span>", a:["Mavi","Kırmızı","Yeşil"], c:0 },
+        { q:"En küçük sayı hangisidir?", a:["15","9","21"], c:1 },
 
-        { q:"Hangi satır daha çok yıldız? ★★★★ vs ★★★", a:["Soldaki","Sağdaki","Eşit"], c:0 },
-        { q:"Hangi şekil büyük?", a:["⬛","⬜","Aynı"], c:2 }
+        { q:"Öğretmen konuşurken ne yapılmalıdır?", a:["Araya girilir","Sessizce dinlenir","Yürünür"], c:1 },
+
+        { q:"Dur levhası ne anlama gelir?", a:["Dön","Dur","Hızlan"], c:1 },
+
+        /* ✅ STROOP — AÇIK VE NET */
+        {
+            q: "YAZININ RENGİ NEDİR?<br><br>" +
+               "<span style='color:red; font-size:32px;'>MAVİ</span>",
+            a: ["Kırmızı","Mavi","Yeşil"],
+            c: 0
+        },
+        {
+            q: "YAZININ RENGİ NEDİR?<br><br>" +
+               "<span style='color:blue; font-size:32px;'>KIRMIZI</span>",
+            a: ["Mavi","Kırmızı","Yeşil"],
+            c: 0
+        },
+
+        /* ✅ YILDIZ SORUSU — HİZALI */
+        {
+            q: "Hangi satırda daha çok yıldız vardır?<br><br>" +
+               "<div style='font-size:28px;'>★★★★</div>" +
+               "<div style='font-size:28px;'>★★★</div>",
+            a: ["Üstteki","Alttaki","Eşit"],
+            c: 0
+        },
+
+        { q:"Hangi şekil daha büyüktür?", a:["⬛","⬜","Aynı"], c:2 }
     ];
 
     examIndex = 0;
     examScore = 0;
 }
+
 
 
 function startExam() {
@@ -928,13 +968,28 @@ function finishExam() {
 
 function saveFinalData() {
 
+    // 🔹 SINAV TOPLAM BONUSU (MAX 5 PUAN)
+    let examTotalBonus = Math.min(5, examScore / 20);
+    // examScore max 100 → 5 puan
+
+    let perTestBonus = examTotalBonus / 6;
+
+    let finalScores = {
+        dikkat: Math.min(20, testScores.dikkat + perTestBonus),
+        daginiklik: Math.min(20, testScores.daginiklik + perTestBonus),
+        odul: Math.min(20, testScores.odul + perTestBonus),
+        hiper: Math.min(20, testScores.hiper + perTestBonus),
+        stroop: Math.min(20, testScores.stroop + perTestBonus),
+        durtu: Math.min(20, testScores.durtu + perTestBonus)
+    };
+
     let totalRaw =
-        testScores.dikkat +
-        testScores.daginiklik +
-        testScores.odul +
-        testScores.hiper +
-        testScores.stroop +
-        testScores.durtu;
+        finalScores.dikkat +
+        finalScores.daginiklik +
+        finalScores.odul +
+        finalScores.hiper +
+        finalScores.stroop +
+        finalScores.durtu;
 
     let totalPercent = Math.round((totalRaw / 120) * 100);
 
@@ -943,21 +998,44 @@ function saveFinalData() {
         class: studentClass,
         date: new Date().toLocaleString(),
 
-        dikkat: testScores.dikkat,
-        daginiklik: testScores.daginiklik,
-        odul: testScores.odul,
-        hiper: testScores.hiper,
-        stroop: testScores.stroop,
-        durtu: testScores.durtu,
+        dikkat: finalScores.dikkat.toFixed(1),
+        daginiklik: finalScores.daginiklik.toFixed(1),
+        odul: finalScores.odul.toFixed(1),
+        hiper: finalScores.hiper.toFixed(1),
+        stroop: finalScores.stroop.toFixed(1),
+        durtu: finalScores.durtu.toFixed(1),
 
-        sinav: examScore,
+        sinav: examScore, // ✅ panelde görünen
+        examTotalBonus: examTotalBonus.toFixed(2),
         totalPercent
     };
 
+    // ✅ KAYDET
     saveStudentResult(data);
-
-    alert("Test tamamlandı.");
+// efektleri durdur
+if (gifInterval) {
+    clearInterval(gifInterval);
+    gifInterval = null;
 }
+bgMusic.pause();
+bgMusic.currentTime = 0;
+
+   // BİTTİ EKRANI
+testScreen.style.display = "flex";
+testScreen.style.background = "#333";
+testScreen.style.fontSize = "48px";
+testScreen.innerHTML = "BİTTİ ✔";
+
+// 3 saniye sonra lobiye dön
+setTimeout(() => {
+    location.reload();
+}, 3000);
+
+}
+
+
+
+
 
 
 
