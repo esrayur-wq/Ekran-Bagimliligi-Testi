@@ -166,8 +166,14 @@ th {
     width: 200px;
     height: 200px;
     display: none;
-    z-index:9999;
+    z-index: 1;              /* ✅ HER ZAMAN ALTA */
+    pointer-events: none;   /* ✅ Tıklamayı bozmaz */
 }
+
+   
+
+
+
 
 #gifArea img {
     width: 100%;
@@ -1070,10 +1076,15 @@ let gifIntervalActive = false;
 
 
 function randomPosition() {
-    let x = Math.random() * (window.innerWidth - 200);
-    let y = Math.random() * (window.innerHeight - 200);
-    return {x,y};
+    const safeTop = 120;      // başlık + yönerge
+    const safeBottom = 300;   // test/sınav alanı
+    let x = Math.random() * (window.innerWidth - 220);
+    let y = Math.random() * (window.innerHeight - 220 - safeBottom);
+
+    if (y < safeTop) y = safeTop;
+    return { x, y };
 }
+
 
 
 function showRandomGif() {
@@ -1104,7 +1115,9 @@ function showEmoji() {
     let pos = randomPosition();
     div.style.left = pos.x + "px";
     div.style.top = pos.y + "px";
-    div.style.zIndex = "99999";
+    div.style.zIndex = "2";
+div.style.pointerEvents = "none";
+
 
     document.body.appendChild(div);
 
