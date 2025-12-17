@@ -162,13 +162,14 @@ th {
    GIF ALANI
 -------------------------------------------------------- */
 #gifArea {
-    position: fixed;
-    width: 200px;
-    height: 200px;
+    position: absolute;   /* ❗ fixed DEĞİL */
+    width: 180px;
+    height: 180px;
     display: none;
-    z-index: 1;              /* ✅ HER ZAMAN ALTA */
-    pointer-events: none;   /* ✅ Tıklamayı bozmaz */
+    z-index: 1;
+    pointer-events: none;
 }
+
 
    
 
@@ -210,6 +211,40 @@ th {
 /* Öğrenci görmesin diye sınav puanı mesajı gizlenecek */
 .hiddenExamMessage {
     display:none !important;
+}
+/* --------------------------------------------------------
+   GIF GÜVENLİ ALAN
+-------------------------------------------------------- */
+#gifSafeZone {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 220px;
+    height: 220px;
+    pointer-events: none;
+    z-index: 1;
+}
+/* --------------------------------------------------------
+   YAZIYI HER ZAMAN ÜSTE AL
+-------------------------------------------------------- */
+#testScreen,
+#examScreen {
+    position: relative;
+    z-index: 10;   /* 🔒 GIF ve emoji bunun ALTINDA kalır */
+}
+/* --------------------------------------------------------
+   GIF & EMOJI ALT KATMAN
+-------------------------------------------------------- */
+#gifSafeZone,
+#gifArea {
+    position: fixed;
+    z-index: 1;    /* 🔽 yazıdan düşük */
+    pointer-events: none;
+}
+#gifArea {
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 </style>
@@ -253,9 +288,15 @@ th {
 <!-- --------------------------------------------------------
      GIF ALANI
 -------------------------------------------------------- -->
-<div id="gifArea">
-    <img id="gifImg" src="">
+<!-- --------------------------------------------------------
+     GIF GÜVENLİ ALAN
+-------------------------------------------------------- -->
+<div id="gifSafeZone">
+    <div id="gifArea">
+        <img id="gifImg" src="">
+    </div>
 </div>
+
 
 
 <!-- --------------------------------------------------------
@@ -1076,12 +1117,9 @@ let gifIntervalActive = false;
 
 
 function randomPosition() {
-    const safeTop = 120;      // başlık + yönerge
-    const safeBottom = 300;   // test/sınav alanı
-    let x = Math.random() * (window.innerWidth - 220);
-    let y = Math.random() * (window.innerHeight - 220 - safeBottom);
-
-    if (y < safeTop) y = safeTop;
+    // gifSafeZone içinde küçük rastgele oynama
+    let x = Math.random() * 20;  // 0–20px
+    let y = Math.random() * 20;  // 0–20px
     return { x, y };
 }
 
@@ -1110,7 +1148,9 @@ function showEmoji() {
     let e = emojiList[Math.floor(Math.random()*emojiList.length)];
     let div = document.createElement("div");
     div.innerHTML = e;
-    div.style.position = "fixed";
+    div.style.position = "absolute";
+    div.style.right = "40px";
+div.style.bottom = "40px";
     div.style.fontSize = "60px";
     let pos = randomPosition();
     div.style.left = pos.x + "px";
